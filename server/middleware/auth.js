@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const auth = async (res, req, next) => {
+const auth = async (req, res, next) => {
     try {
         const token = req.headers.authorization.split(" ")[1];
         // our token lower then google token (500)
@@ -10,9 +10,7 @@ const auth = async (res, req, next) => {
         if (token && isCustomAuth) {
             decodedData = jwt.verify(token, 'test');
             req.userId = decodedData?.id;
-        }
-
-        if (token && !isCustomAuth) {
+        } else {
             decodedData = jwt.decode(token);
             req.userId = decodedData?.sub; // userId of google
         }

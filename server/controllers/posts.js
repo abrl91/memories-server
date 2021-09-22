@@ -12,8 +12,8 @@ export const getPosts = async (req, res) => {
 }
 
 export const createPost = async (req, res) => {
-    const { body } = req;
-    const newPost = new PostMessage(body);
+    const post = req.body;
+    const newPost = new PostMessage({ ...post, creator: req.userId, createdAt: new Date().toISOString() });
 
     try {
        await newPost.save();
@@ -46,7 +46,7 @@ export const deletePost = async (req, res) => {
 export const likePost = async (req, res) => {
     const {id: _id} = req.params;
 
-    if (req.userId) return res.status(400).json({message: 'Unauthenticated'});
+    if (!req.userId) return res.status(400).json({message: 'Unauthenticated'});
 
     if (!mongoose.Types.ObjectId.isValid(_id)) return res.statusCode(404).send('No post with that id');
 
@@ -55,10 +55,8 @@ export const likePost = async (req, res) => {
     if (index === -1) {
         // like the post
         post.likes.push(req.userId);
-    }
-
-    if (index !== -1) {
-        // undo like post
+    } else {
+        // undo like
         post.likes = post.likes.filter((id) => id !== String(req.userId));
     }
 
